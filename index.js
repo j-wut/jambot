@@ -1,5 +1,6 @@
 import tmi from "tmi.js";
 import { tmiIdentity } from "./auth.js";
+import commands from "./commands.js";
 
 const client = new tmi.Client({
     connection: {
@@ -10,11 +11,28 @@ const client = new tmi.Client({
     identity: tmiIdentity
 });
 
-console.log("jam jamming");
-client.connect();
+client.connect().then(
+    client.getChannels().forEach((channel)=>{
+        client.say(channel, "initiating jamming :3");
+    })
+);
+
+const functionRegex = /^jam\.(\w+)\(([\w\[,\s\]]*)\)$/;
 
 client.on('message', (channel, tags, message, self)=>{
     console.log(`channel: ${channel}`);
-    console.log(tags);
     console.log(`${tags['display-name']}: ${message}`);
+    const matches = message.match(functionRegex);
+    if (!!matches) {
+        console.log("Command Found:");
+        console.log(matches)
+        console.log(`${matches[1]}: ${matches[2]}`);
+        const [_, command, args] = matches;
+        const validCommand = Object.keys(commands).find((val)=>val === command);
+        if (validCommand) {
+            commands[validCommand](channel, tags, args.split(/[\s,]+/), client);
+        } else {
+            client.say(channel, `Uncaught TypeError: ${command} is not a function`);
+        }
+    }
 });
