@@ -1,0 +1,25 @@
+{
+  "name": "jambot",
+  "version": "1.0.0",
+  "description": "twitch bot for jam",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j-wut/jambot.git"
+  },
+  "keywords": [
+    "twitch",
+    "chat",
+    "bot",
+    "jam"
+  ],
+  "author": "James Wu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/j-wut/jambot/issues"
+  },
+  "homepage": "https://github.com/j-wut/jambot#readme"
+}
