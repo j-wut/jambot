@@ -10,9 +10,9 @@ export function hai(channel, tags, args, client) {
 
 export function createConst(channel, tags, args, client) {
     if (isMod(tags)){
-        client.say(channel, `const ${args[0]} initialized`);
         constStore[args[0]] = Number(args[1]) || 0;
-        console.log(constStore);
+        console.log("constStore:", constStore);
+        client.say(channel, `const ${args[0]} initialized to ${constStore[args[0]]}`);
     }
 }
 
@@ -27,7 +27,20 @@ export function createCommand(channel, tags, args, client) {
 }
 
 
-const argMatcher = /((?:(?:'.*')|(?:".*")|(?:`.*`)|(?:[^'"`,\s]*)))[,\s]*/;
+const argMatcher = /((?:(?:'.*')|(?:".*")|(?:`.*`)|(?:[^'"`,\s]+)))[,\s]*/g;
+
+export const argsParser = (argString) => {
+    const matches = argString.trim().matchAll(argMatcher);
+    let currentMatcher = matches.next();
+    const args = [];
+    while (currentMatcher.value && !currentMatcher.done) {
+        args.push(currentMatcher.value[1]);
+        currentMatcher = matches.next();
+    }
+    console.debug(`argsParsed: `, args);
+    return args;
+}
+
 
 
 
