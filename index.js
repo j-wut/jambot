@@ -17,22 +17,28 @@ client.connect().then(
     })
 );
 
-const functionRegex = /^jam\.(\w+)\(([\w\[,\s\]]*)\)$/;
+const functionRegex = /^jam\.(\w+)\(\s*((?:(?:(?:'.*')|(?:".*")|(?:`.*`)|([^'"`,\s]*))[,\s]*)*)\)$/;
 
 client.on('message', (channel, tags, message, self)=>{
-    console.log(`channel: ${channel}`);
-    console.log(`${tags['display-name']}: ${message}`);
-    const matches = message.match(functionRegex);
-    if (!!matches) {
-        console.log("Command Found:");
-        console.log(matches)
-        console.log(`${matches[1]}: ${matches[2]}`);
-        const [_, command, args] = matches;
-        const validCommand = Object.keys(commands).find((val)=>val === command);
-        if (validCommand) {
-            commands[validCommand](channel, tags, args.split(/[\s,]+/), client);
-        } else {
-            client.say(channel, `Uncaught TypeError: ${command} is not a function`);
+    try{
+        console.log(tags);
+        const matches = message.match(functionRegex);
+        if(!matches && message.substring(0,4) === "jam."){
+            client.say(channel, "misformated command");
+        } else if (!!matches) {
+
+            console.log("Command Found:");
+            console.log(matches)
+            console.log(`${matches[1]}: ${matches[2]}`);
+            const [_, command, args] = matches;
+            const validCommand = Object.keys(commands).find((val)=>val === command);
+            if (validCommand) {
+                commands[validCommand](channel, tags, args.split(/[\s,]+/), client);
+            } else {
+                client.say(channel, `Uncaught TypeError: ${command} is not a function`);
+            }
         }
+    } catch (e) {
+        console.error(e);
     }
 });
