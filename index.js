@@ -23,7 +23,7 @@ client.on('message', (channel, tags, message, self)=>{
     try{
         const matches = message.match(functionRegex);
         if(!matches && message.substring(0,4) === "jam."){
-            client.say(channel, "misformated command");
+            throw new Error("misformated command");
         } else if (!!matches) {
 
             console.log("Command Found:", matches);
@@ -32,10 +32,11 @@ client.on('message', (channel, tags, message, self)=>{
             if (validCommand) {
                 commands[validCommand](channel, tags, argsParser(args), client);
             } else {
-                client.say(channel, `Uncaught TypeError: ${command} is not a function`);
+                throw new Error(`Uncaught TypeError: ${command} is not a function`);
             }
         }
     } catch (e) {
         console.error(e);
+        client.say(channel, e.message);
     }
 });

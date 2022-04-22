@@ -67,9 +67,37 @@ export const insertArgs = (inputString, argList, allowStrings = true) => {
 const isStringArg = (input) => {
     return input && input[0] === input[input.length-1] && ['"', '`', '\''].includes(input[0]);
 }
+/*
+node:
+{ operator: +-/*^,
+  Left: Node,
+  Right: Node,
+  value: ??
+}
+*/
+
+const evaluateExpressionTree = (head) => {
+    switch(head.operator){
+        case '+': return evaluateExpressionTree(head.left) + evaluateExpressionTree(head.right);
+        case '-': return evaluateExpressionTree(head.left) - evaluateExpressionTree(head.right);
+        case '/': return evaluateExpressionTree(head.left) / evaluateExpressionTree(head.right);
+        case '*': return evaluateExpressionTree(head.left) * evaluateExpressionTree(head.right);
+        case '^': return Math.pow(evaluateExpressionTree(head.left), evaluateExpressionTree(head.right));
+        default:
+            if(head.value)
+                return head.value;
+            else
+                throw new Error("Invalid Operation");
+    }
+}
+
+export function mockExpressionTree(channel, tags, args, client) {
+    client.say(channel, String(evaluateExpressionTree({operator: args[0], left: {value: Number(args[1])}, right:{value:Number(args[2])}})));
+}
 
 export default {
     hai,
     createConst,
-    insertArg
+    insertArg,
+    mockExpressionTree
 }
