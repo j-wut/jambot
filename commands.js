@@ -75,6 +75,18 @@ node:
   value: ??
 }
 */
+const variableExpressionRegex = /((\w+)((?:\+\+)|(?:\-\-))?)/
+
+/*
+    1. replace variable inc/dec with placeholder
+    2. Create Tree
+    3. (successful tree creation)
+    4. replace placeholders in tree with variable inc/dec
+    5. slice variable store
+    6. evaluate with copy of variable store
+    7. if successful replace variable store with slice
+    8. if unsuccessful, throw error, discard copy of variable store
+*/
 
 const evaluateExpressionTree = (head) => {
     switch(head.operator){
