@@ -75,7 +75,124 @@ node:
   value: ??
 }
 */
+
+
+export function testExpressionBuilder(channel, tags, args, client) {
+    const expressionTree = buildExpressionTree(args[0]);
+    client.say(channel, expressionTreeToString(expressionTree));
+    client.say(channel, String(evaluateExpressionTree(expressionTree)));
+}
 const variableExpressionRegex = /((\w+)((?:\+\+)|(?:\-\-))?)/
+
+const operatorCharacters = ['+','-','*','/','^'];
+const incDec = ["++","--"];
+
+const isEquation = (inputString) =>{
+return inputString.length > 1  && inputString.match(/[\+\-\*\/\^\(\)]/);
+}
+
+const getTier = (op) => {
+    const tiers= [
+        ['^'],
+        ['*','/'],
+        ['+','-']
+    ];
+    return tiers.findIndex((tier)=>tier.includes(op))
+}
+
+const buildExpressionTree = (inputString) =>  {
+    const arrayOfThings = [];
+    let currentString="";
+    let depth=0;
+    for(let index=0;index<inputString.length;index++){
+        if(depth || inputString[index]=='('){
+            if(inputString[index]=='('){
+                if(depth++){
+                    currentString+=inputString[index];
+                }
+            }else if(inputString[index]==')'){
+                if(!--depth){
+                    arrayOfThings.push(currentString);
+                    currentString="";
+                }else{
+                    currentString+=inputString[index];
+                }
+            } else {
+                currentString+=inputString[index]
+            }
+        }else if(inputString[index]==' '){
+            arrayOfThings.push(currentString);
+            currentString="";
+        }else if(operatorCharacters.includes(inputString[index])){
+            arrayOfThings.push(currentString);
+            currentString="";
+            arrayOfThings.push(inputString[index]);
+        } else {
+            currentString+=inputString[index]
+        }
+        console.log("currentString:",currentString);
+        console.log("ArrayOfThings:",arrayOfThings);
+    }
+    arrayOfThings.push(currentString);
+    
+    console.log("final ArrayOfThings:",arrayOfThings);
+
+    const filteredArrayOfThings = arrayOfThings.filter((thing)=>thing);
+    console.log("filteredArrayOfThings:", filteredArrayOfThings);
+
+    // Heres where we built the tree
+    let head;
+    while(filteredArrayOfThings.length){
+        if(!head){
+            let left = filteredArrayOfThings.shift();
+            let operator = filteredArrayOfThings.shift();
+            let right = filteredArrayOfThings.shift();
+            // if (right == operator && (operator == '-' || operator == '+')){
+            //     left+=operator+right;
+            //     operator = filteredArrayOfThings.shift();
+            //     right = filteredArrayOfThings.shift();
+            // }
+            head = {
+                left: isEquation(left) ? buildExpressionTree(left) : {value: Number(left)},
+                operator,
+                right: isEquation(right) ? buildExpressionTree(right) : {value: Number(right)}
+            }
+        } else {
+            let operator = filteredArrayOfThings.shift();
+            let next = filteredArrayOfThings.shift();
+            // if (next == operator && (operator == '-' || operator == '+')){
+            //     left+=operator+right;
+            //     operator = filteredArrayOfThings.shift();
+            //     right = filteredArrayOfThings.shift();
+            // }
+            if(getTier(operator) <= getTier(head.operator)){
+                head = {
+                    left: head,
+                    operator: operator,
+                    right: isEquation(next) ? buildExpressionTree(next) : {value: Number(next)},
+                }
+            } else {
+                head.right = {
+                    left: head.right,
+                    operator: operator,
+                    right: isEquation(next) ? buildExpressionTree(next) : {value: Number(next)}
+                }
+            }
+        }
+        console.log("-".repeat(20));
+        console.log(expressionTreeToString(head));
+
+    }
+    console.log(expressionTreeToString(head));
+    return head;
+}
+
+const expressionTreeToString = (head, depth=0) => {
+    console.log(head);
+    return head.value ? 
+    `${"--".repeat(depth)}Value: ${head.value}` : 
+    `${"--".repeat(depth)}Operator: ${head.operator}\n${"--".repeat(depth)}Left:\n${expressionTreeToString(head.left,depth+1)}\n${"--".repeat(depth)}Right:\n${expressionTreeToString(head.right,depth+1)}`
+}
 
 /*
     1. replace variable inc/dec with placeholder
@@ -111,5 +228,6 @@ export default {
     hai,
     createConst,
     insertArg,
-    mockExpressionTree
+    mockExpressionTree,
+    testExpressionBuilder
 }
